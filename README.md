@@ -12,6 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 
 My Model was able to correctly identify churning employees 75% of the time.
