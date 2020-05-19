@@ -9,34 +9,31 @@ Original file is located at
 
 import pandas as pd
 import numpy as np
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
+from constants import ESTIMATOR, PREDS_DEST, PATH
 
-from google.colab import drive
-drive.mount('/content/Drive')
+def load_data(path):
+    return pd.read_csv(path)
 
-data = pd.read_csv('/content/Drive/My Drive/Colab Notebooks/1000ml/Unit2/Project4/hr-data.csv')
+def salar_sales_binarizer(data):
+    data['salary'] = np.where(data['salary'].isin(['low','medium']), 1, 0)
+    data['sales'] = np.where(data['sales'].isin(['RandD','management']), 0, 1)
 
-#set variables
-data['salary'] = np.where(data['salary'].isin(['low','medium']), 1, 0)
-data['sales'] = np.where(data['sales'].isin(['RandD','management']), 0, 1)
-x = data.drop(['id','churn'],axis=1)
-y = data['churn']
+def data_splitter(data):
+    features = data.drop(['id','churn'],axis=1)
+    target = data['churn']
+    return features, target
 
-#Make pipe, but change solver
-estimator = Pipeline(steps = [('scaler', StandardScaler()), 
-                              ('clf', LogisticRegression(penalty = 'l2', 
-                                                        class_weight = 'balanced', 
-                                                        solver = 'liblinear', 
-                                                        random_state=42,
-                                                        C = 1e-06))])
+def predict_on_data(ESTIMATOR, X, y):
+    predictions = ESTIMATOR.fit(X, y).predict(X)
+    return predictions
 
-estimator.fit(x_train,y_train)
+def write_predictions_csv(y_pred):
+    pd.DataFrame(y_pred).to_csv(PREDS_DEST)
 
-predictions = pd.DataFrame(estimator.predict(x))
+def main():
+    X_train, y_train = data_splitter(salar_sales_binarizer(load_data(PATH)))
+    write_predictions_csv(predict_on_data(ESTIMATOR, X_train, y_train))
 
-predictions.to_csv('/content/Drive/My Drive/Colab Notebooks/1000ml/Unit2/Project4/predictions.csv')
-
+if __name__ == "__main__":
+    main()
